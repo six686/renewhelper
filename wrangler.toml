@@ -2,6 +2,7 @@ name = "renewhelper"
 main = "_worker.js"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
+keep_vars = true
 
 [env.production]
 name = "renewhelper"
@@ -13,8 +14,8 @@ name = "renewhelper-staging"
 # 注意：在一键部署过程中，Cloudflare 会提示您创建一个新的 KV 并自动填充 ID
 [[kv_namespaces]]
 binding = "RENEW_KV"
-id = ""  # 本地开发占位符。部署前请运行 `npx wrangler kv:namespace create RENEW_KV` 并填入真实 ID
-preview_id = ""
+id = "48ce534125b24bd3946e9fd2c2b2faeb"  # 本地开发占位符。部署前请运行 `npx wrangler kv:namespace create RENEW_KV` 并填入真实 ID
+preview_id = "renewhelper"
 
 # 设置定时任务 (Cron Triggers)
 # 这里设置每 30 分钟检查一次 (0,30 * * * *)
@@ -24,6 +25,7 @@ crons = ["0,30 * * * *"]
 
 # 环境变量默认值 (可选)
 # 部署时通常会提示用户输入，这里作为默认值
-[vars]
-AUTH_PASSWORD = "admin"
+# [vars]
+# AUTH_PASSWORD = "admin"
+
 
