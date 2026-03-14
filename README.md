@@ -2,6 +2,7 @@
 
 [English](./README_EN.md) | **中文**
 
+![Docker Pulls](https://img.shields.io/docker/pulls/ieax/renewhelper?logo=docker)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange?logo=cloudflare)
 ![Vue.js](https://img.shields.io/badge/Frontend-Vue3%20%2B%20ElementPlus-42b883?logo=vue.js)
 ![License](https://img.shields.io/badge/License-MIT-blue)
@@ -9,8 +10,9 @@
 **RenewHelper - 时序·守望** 是一款基于 **Cloudflare Workers** 的全栈服务生命周期提醒、管理工具。它专为管理周期性订阅、域名续费、服务器到期等场景设计。无需服务器，零成本托管，提供精美的机甲风（Mecha-style）UI 界面、强大的农历/公历计算核心、多渠道通知推送能力以及 iCal 日程同步。**同时支持Worker方式和Docker方式部署。v2.x新增资金流向看板，拥有完善的账单管理功能。v3.x前后端完全分离重构，不依赖任何CDN引入即可独立运行。**
 
 <div align="center">
-  <img src="./assets/mainUI_darkCN_shotv2.png" alt="RenewHelper 界面预览" width="800">
-  <img src="./assets/DashboardUI_darkCN.png" alt="RenewHelper 界面预览" width="800">
+  <img src="./assets/mainUI_darkCN_shotv3.png" alt="RenewHelper 界面预览" width="800">
+  <img src="./assets/CalendarUI_darkCN_shotv3.png" alt="RenewHelper 界面预览" width="800">
+  <img src="./assets/DashboardUI_darkCNv3.png" alt="RenewHelper 界面预览" width="800">
 </div>
 
 ## ✨ 核心特性
@@ -19,7 +21,7 @@
 - **📅 智能周期管理**：
   - 支持**公历**与**农历**（Lunar）周期计算。内置高精度农历算法（1900-2100），支持公历循环（如月付/年付）和农历循环（如生日、传统节日）。
   - 支持按天、月、年为周期的自动推算。
-  - 提供“循环订阅”与“到期重置”两种模式。
+  - 提供“循环订阅”、“到期重置”及“固定重复”三种模式。
 - **🔔 多渠道通知**：
   - 内置支持 **Telegram, Bark, PushPlus, Server酱3, 钉钉 (DingTalk), 飞书 (Lark), 企微 (WeCom), NotifyX, Resend (Email), Gotify, Ntfy, Webhook**。
   - 允许添加**无限个**推送渠道，支持为每个项目配置不同的推送渠道。支持**批量管理**与**快速分配**。
@@ -341,24 +343,26 @@ docker compose up -d
 
 ### 添加服务
 
+<div align="center">
+  <img src="./assets/AddUI_darkCN_shotv3.png" alt="RenewHelper 界面预览" width="600">
+</div>
+
 - **名称**：服务的名称（如 "Netflix 4K"，"Google Voice - 8888"）。
 - **标签**：用于分类（如 `Media`, `Server`, `Domain`, `PhoneNumber`），支持多选。
 - **模式**：
   - 📅 **循环订阅(Cycle)**：每隔固定周期（如 1 个月/1 个自然年/1 个农历年）到期的各种事项，如月付会员订阅、年付 VPS 续费等。
   - ⏳ **到期重置(Reset)**：到期后需手动或自动处理，有效期随之展期的各种事项，如 eSIM 动账延长 180 天有效期、签到增加服务时长等。
-  - 🔁 **固定计划(Repeat)**：基于强大的 RRULE 规则引擎打造。适用于“每月的第二个星期五”、“每两个星期的周三和周日”这类按自然习惯定期的事件。该模式完全兼容标准的 ICS 日历格式。
+  - 🔁 **固定重复(Repeat)**：基于强大的 RRULE 规则引擎打造。适用于“每月的第二个星期五”、“每两个星期的周三和周日”这类按自然习惯定期的事件。
 - **农历开关**：开启后，周期将按农历计算（适合农历生日、事物提醒）。
-- **提前提醒**：可自由选择需要提前多少天收到通知，支持**多选**（例如同时勾选“当天”和“提前3天”接收推送）。
+- **提前提醒**：可自由选择需要提前多少天收到通知，支持提醒时间**多选**（例如同时勾选“8:00”和“18:00”接收推送）。
 - **自动化策略**：
   - **自动续期**：到期后自动将下次到期日顺延一个周期。
   - **自动禁用**：到期超过指定天数未处理，自动标记为禁用。
+- **续费链接**：
+  - 可选，填写后在手动续期页面中会出现“去续期”按钮，帮助用户快速跳转至目标网站进行续期操作。  
 
 ### 批量操作
 在项目列表视图，您可以勾选列表左侧的复选框，进行多项服务的**批量删除**、**批量暂停/启用**检查，以及最为实用的**批量分配通知渠道**功能（快速为一组服务绑定相同的推送通道）。
-
-<div align="center">
-  <img src="./assets/AddUI_darkCN_shot.png" alt="RenewHelper 界面预览" width="600">
-</div>
 
 ### 查看日志
 

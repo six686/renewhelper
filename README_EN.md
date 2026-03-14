@@ -2,6 +2,7 @@
 
 **[English]** | [中文](./README.md)
 
+![Docker Pulls](https://img.shields.io/docker/pulls/ieax/renewhelper?logo=docker)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange?logo=cloudflare)
 ![Vue.js](https://img.shields.io/badge/Frontend-Vue3%20%2B%20ElementPlus-42b883?logo=vue.js)
 ![License](https://img.shields.io/badge/License-MIT-blue)
@@ -9,8 +10,9 @@
 **RenewHelper** is a full-stack service lifecycle reminder and management tool based on **Cloudflare Workers**. It is designed to manage periodic subscriptions, domain renewals, server expirations, and more. It requires no server (Serverless), incurs zero hosting costs, and features a stunning Mecha-style UI, a powerful Lunar/Solar calendar core, multi-channel notifications, and iCal schedule synchronization. **It supports both Worker and Docker deployments. v2.x introduces a cash flow dashboard with comprehensive billing management features. v3.x features a fully refactored frontend/backend separation and can run independently without any CDN dependencies.**
 
 <div align="center">
-  <img src="./assets/mainUI_lightEN_shotv2.png" alt="RenewHelper 界面预览" width="800">
-  <img src="./assets/DashboardUI_lightEN.png" alt="RenewHelper 界面预览" width="800"> 
+  <img src="./assets/mainUI_lightEN_shotv3.png" alt="RenewHelper 界面预览" width="800">
+  <img src="./assets/CalendarUI_lightEN_shotv3.png" alt="RenewHelper 界面预览" width="800"> 
+  <img src="./assets/DashboardUI_lightENv3.png" alt="RenewHelper 界面预览" width="800"> 
 </div>
 
 ## ✨ Key Features
@@ -20,7 +22,7 @@
   - Supports both **Solar (Gregorian)** and **Lunar** calendar cycles. Built-in high-precision Lunar algorithm (1900-2100).
   - Perfect for handling monthly/yearly subscriptions (Solar) or birthdays/traditional festivals (Lunar).
   - Supports automatic calculation based on Day, Month, or Year intervals.
-  - Two modes: "Cycle Subscription" (Repeating) and "Expiration Reset" (Manual extension).
+  - Three modes: "Cycle Subscription" (Repeating), "Expiration Reset" (Manual extension) and "Repeat" (Fixed Schedule).
 - **🔔 Multi-Channel Notifications**:
   - Built-in support for **Telegram, Bark, PushPlus, ServerChan3, DingTalk, Lark (Feishu), WeCom, NotifyX, Resend (Email), Gotify, Ntfy, Webhook**.
   - Allows adding **unlimited** notification channels, supporting different channels for each project. Supports **batch management** and **quick assignment**.
@@ -256,6 +258,13 @@ docker compose up -d
 Your service will be available at `https://your-domain.com`.
 </details>
 
+#### ⚠️ Important: Timezone Alignment
+
+To ensure reminders are triggered at the correct moment, please keep **both** of the following settings consistent:
+
+1. **Docker Environment Variable (`TZ`)** – controls when RenewHelper “wakes up” to run the cron job.
+2. **Web UI → Settings → Timezone** – controls what time RenewHelper thinks it is once it wakes up.
+
 #### 💾 Data Management
 
   * **Location**: All data (subscriptions, settings, logs) is stored in the `./data` directory in the same folder as your `docker-compose.yml`.
@@ -273,6 +282,23 @@ docker compose pull
 # 2. Recreate the container
 docker compose up -d
 ```
+
+### Telegram Proxy Service (Optional)
+
+> ⚠️ **For mainland China users**: due to network restrictions, servers located in China may be unable to reach the Telegram API. You can deploy the lightweight proxy shipped with this project. It works with Workers/Pages/Snippets (priority: Snippets > Pages > Workers).
+
+1. **Prepare the file**: copy the code from `renewhelper/telegram_proxy/_worker.js`.
+2. **Create a Worker/Pages/Snippets service**:
+   - In the Cloudflare dashboard create a new Worker/Pages/Snippet (e.g., `tg-proxy`).
+   - Paste the code and deploy.
+3. **Configure whitelist (`TG_ALLOW_TOKENS`)**:
+   - In Settings → Variables add `TG_ALLOW_TOKENS` (for Pages redeploy after change).
+   - The value should contain the bot tokens you allow (comma separated).  
+     *If you don't want to use environment variables, edit the `WHITELIST_TOKENS` constant in code instead.*
+4. **Usage**:
+   - Your proxy endpoint will be `https://tg-proxy.your-subdomain.workers.dev` or any custom domain you bind.
+   - It can act as a transparent proxy for Telegram APIs, supporting `POST /bot<Token>/<Method>` requests.
+   - *This helper exists purely to solve environments where Docker deployments cannot reach Telegram directly.*
 
 ### 🎉 Deployment Complete!
 
@@ -316,24 +342,27 @@ In the "Settings" -> "Notifications" section, click the **Add Channel** button, 
 
 ### Adding a Service
 
+<div align="center">
+  <img src="./assets/AddUI_lightEN_shotv3.png" alt="RenewHelper 界面预览" width="600">
+</div>
+
 - **Name**: Service name (e.g., "Netflix 4K", "Google Voice - 8888").
 - **Tags**: For categorization (e.g., `Media`, `Server`, `Domain`, `PhoneNumber`). Supports multiple tags.
 - **Mode**:
   - 📅 **Cycle Subscription**: For items that expire every fixed cycle (e.g., 1 Month / 1 Year). Good for monthly subs, VPS renewals.
   - ⏳ **Expiration Reset**: For items that need manual/auto handling upon expiration to extend validity. Good for eSIM validity extension (e.g., extend 180 days on top-up).
-  - 🔁 **Repeat (Fixed Schedule)**: Built on a powerful RRULE engine. Suitable for recurring events based on natural habits like "the second Friday of every month" or "every two weeks on Wednesday and Sunday." Fully compatible with standard ICS calendar formats.
+  - 🔁 **Repeat (Fixed Schedule)**: Built on a powerful RRULE engine. Suitable for recurring events based on natural habits like "the second Friday of every month" or "every two weeks on Wednesday and Sunday." 
 - **Lunar Cycle**: Enable this for calculations based on the Lunar calendar (Birthdays, traditional events).
-- **Advance Notice**: Freely choose how many days in advance to receive notifications; supports **multiple selections** (e.g., selecting both "on the day" and "3 days in advance").
+- **Advance Notice**: Freely choose how many days in advance to receive notifications; supports **multiple time selections** (e.g., selecting both "8:00" and "18:00").
 - **Automation Policy**:
   - **Auto-Renew**: Automatically extends the next due date by one cycle upon expiration.
   - **Auto-Disable**: Automatically marks the service as disabled if it remains overdue for a specified number of days.
+- **Renew Link**:
+  - Optional. When filled, a “Renew” button appears in the manual renewal dialog so you can quickly jump to the payment/renewal page.
 
 ### Batch Operations
 In the project list view, you can check the checkboxes on the left side of the list to perform **batch deletion**, **batch pause/enable**, and the highly practical **batch assign notification channels** function (quickly bind the same push channels to a group of services).
 
-<div align="center">
-  <img src="./assets/AddUI_darkEN_shot.png" alt="RenewHelper 界面预览" width="600">
-</div>
 
 ### Viewing Logs
 
